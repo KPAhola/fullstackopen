@@ -1,0 +1,28 @@
+```mermaid
+sequenceDiagram
+	participant selain
+	participant palvelin
+
+	selain->>palvelin: GET https://studies.cs.helsinki.fi/spa
+	activate palvelin
+	palvelin->>selain: HTML-asiakirja
+	deactivate palvelin
+
+	selain->>palvelin: GET https://studies.cs.helsinki.fi/main.css
+	activate palvelin
+	palvelin->>selain: CSS-tiedosto
+	deactivate palvelin
+
+	selain->>palvelin: GET https://studies.cs.helsinki.fi/spa.js
+	activate palvelin
+	palvelin->>selain: JavaScript-tiedosto
+	deactivate palvelin
+	Note right of selain: Selain alkaa suorittaa palvelimelta muistiinpanot sisältävän JSON-datan noutavaa JavaScript-koodia
+
+	selain->>palvelin: GET https://studies.cs.helsinki.fi/data.json
+	activate palvelin
+	palvelin->>selain: muistiinpanot sisätävä JSON-data
+	deactivate palvelin
+
+	Note right of selain: Selain suorittaa tapahtumankäsittelijän, joka renderöi muistiinpanot ruudulle
+```
