@@ -1,0 +1,39 @@
+```mermaid
+sequenceDiagram
+	participant selain
+	participant palvelin
+
+	selain->>palvelin: POST https://studies.cs.helsinki.fi/exampleapp/new_note
+	activate palvelin
+
+	Note right of palvelin: Palvelin luo uutta muistiinpanoa vastaavan olion ja laittaa sen muistiinpanot sisältävään taulukkoon
+
+	palvelin->>selain: 302 Found
+	deactivate palvelin
+
+	Note right of selain: Palvelimelta vastauksena saadun uudelleenohjauspyynnön seurauksena selain tekee uuden GET-pyynnön osoitteeseen notes
+
+	selain->>palvelin: GET https://studies.cs.helsinki.fi/exampleapp/notes
+	activate palvelin
+	palvelin->>selain: HTML-dokumentti
+	deactivate palvelin
+
+	selain->>palvelin: GET https://studies.cs.helsinki.fi/exampleapp/main.css
+	activate palvelin
+	palvelin->>selain: CSS-tiedosto
+	deactivate palvelin
+
+	selain->>palvelin: GET https://studies.cs.helsinki.fi/exampleapp/main.js
+	activate palvelin
+	palvelin->>selain: JavaScript-tiedosto
+	deactivate palvelin
+
+	Note right of selain: Selain alkaa suorittaa palvelimelta muistiinpanot sisältävän JSON-datan noutavaa JavaScript-koodia
+
+	selain->>palvelin: GET https://studies.cs.helsinki.fi/exampleapp/data.json
+	activate palvelin
+	palvelin->>selain: Muistiinpanot sisältävä JSON-data
+	deactivate palvelin
+
+	Note right of selain: Selain suorittaa tapahtumankäsittelijän, joka renderöi muistiinpanot ruudulle
+```
