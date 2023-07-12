@@ -36,14 +36,19 @@ const PersonForm = ({ newName, newNumber, handleNameChange, handleNumberChange, 
   )
 }
 
-const Person = ({person}) => (
-  <p>{person.name} {person.number}</p>
+const Person = ({person, removeContact}) => (
+  <>
+    <p>
+      {person.name} {person.number} 
+      <button onClick={removeContact}>delete</button>
+    </p>
+  </>
 )
 
-const Persons = ({ persons, filter }) => {
+const Persons = ({ persons, filter, removeContact }) => {
   return (
     <>
-      {persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase())).map(person => <Person key={person.name} person={person} />)}
+      {persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase())).map(person => <Person key={person.name} person={person} removeContact={removeContact(person.id)} />)}
     </>
   )
 }
@@ -78,6 +83,21 @@ const App = () => {
     setNewNumber('')
   }
 
+  const removeContact = (id) => {
+    const name = persons.find(person => person.id === id).name
+    return (
+      () => window.confirm(`Delete ${name}?`) 
+              ? contactService.remove(id)
+                  .then(setPersons(persons.filter(person => person.id !== id)))
+                  .catch(error => {
+                            alert(`${name} was already removed from server`)
+                            setPersons(persons.filter(person => person.id !== id))
+                          }
+                  )
+              : null
+    )
+  }
+
   const handleNameChange = (event) => {
     setNewName(event.target.value)
   }
@@ -97,7 +117,7 @@ const App = () => {
       <h3>add a new</h3>
       <PersonForm newName={newName} newNumber={newNumber} handleNameChange={handleNameChange} handleNumberChange={handleNumberChange} addContact={addContact} />
       <h3>Numbers</h3>
-      <Persons persons={persons} filter={filter} />
+      <Persons persons={persons} filter={filter} removeContact={removeContact} />
     </div>
   )
 

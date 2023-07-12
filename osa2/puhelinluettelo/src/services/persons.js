@@ -17,4 +17,11 @@ const create = contact => {
   )
 }
 
-export default { getAll, create }
+const remove = id => {
+  return (
+    axios
+      .delete(`${baseUrl}/${id}`)
+  )
+}
+
+export default { getAll, create, remove }
