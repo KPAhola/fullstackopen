@@ -75,8 +75,12 @@ const App = () => {
       name: newName,
       number: newNumber
     }
+    const replaceNumber = () => {
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`))
+        contactService.update(persons.find(person => person.name === newName).id, newContact).then(response => setPersons(persons.map(person => person.name !== newName ? person : response)))
+    }
     persons.map(person => person.name).includes(newName)
-      ? alert(`${newName} is already added to phonebook`)
+      ? replaceNumber()
       : contactService.create(newContact)
           .then(response => setPersons(persons.concat(response)))
     setNewName('')
@@ -86,15 +90,16 @@ const App = () => {
   const removeContact = (id) => {
     const name = persons.find(person => person.id === id).name
     return (
-      () => window.confirm(`Delete ${name}?`) 
-              ? contactService.remove(id)
-                  .then(setPersons(persons.filter(person => person.id !== id)))
-                  .catch(error => {
-                            alert(`${name} was already removed from server`)
-                            setPersons(persons.filter(person => person.id !== id))
-                          }
-                  )
-              : null
+      () => {
+          if (window.confirm(`Delete ${name}?`) )
+              contactService.remove(id)
+                .then(setPersons(persons.filter(person => person.id !== id)))
+                .catch(error => {
+                          alert(`${name} was already removed from server`)
+                          setPersons(persons.filter(person => person.id !== id))
+                        }
+                )
+      }
     )
   }
 
