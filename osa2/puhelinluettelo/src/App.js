@@ -1,6 +1,28 @@
 import { useState, useEffect } from 'react'
 import contactService from './services/persons'
 
+const Notification = ({ message }) => {
+  const notificationStyle = {
+    color: 'green',
+    backgroundColor: 'lightgrey',
+    fontSize: '20px',
+    borderStyle: 'solid',
+    borderRadius: '5px',
+    padding: '10px',
+    marginBottom: '10px'
+  }
+
+  if (message === null) {
+    return null
+  
+  }
+  return (
+    <div style={notificationStyle}>
+      {message}
+    </div>
+  )
+}
+
 const Filter = ({ filter, handleFilterChange }) => {
   return (
     <form>
@@ -63,11 +85,17 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [notification, setNotification] = useState(null)
 
   useEffect(() => {
     contactService.getAll()
       .then(response => setPersons(response))
   }, [])
+
+  const showSuccessMessage = (message) => {
+    setNotification(message)
+    setTimeout(() => setNotification(null), 5000)
+  }
 
   const addContact = (event) => {
     event.preventDefault()
@@ -75,14 +103,22 @@ const App = () => {
       name: newName,
       number: newNumber
     }
+
     const replaceNumber = () => {
-      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`))
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
         contactService.update(persons.find(person => person.name === newName).id, newContact).then(response => setPersons(persons.map(person => person.name !== newName ? person : response)))
+        showSuccessMessage(`Changed ${newName}'s number`)
+      }
     }
+
     persons.map(person => person.name).includes(newName)
       ? replaceNumber()
       : contactService.create(newContact)
-          .then(response => setPersons(persons.concat(response)))
+          .then(response => {
+            setPersons(persons.concat(response))
+            showSuccessMessage(`Successfully added ${newName}`)
+          }
+          )
     setNewName('')
     setNewNumber('')
   }
@@ -93,7 +129,11 @@ const App = () => {
       () => {
           if (window.confirm(`Delete ${name}?`) )
               contactService.remove(id)
-                .then(setPersons(persons.filter(person => person.id !== id)))
+                .then(() => {
+                  setPersons(persons.filter(person => person.id !== id))
+                  showSuccessMessage(`Removed ${name}`)
+                }
+                )
                 .catch(error => {
                           alert(`${name} was already removed from server`)
                           setPersons(persons.filter(person => person.id !== id))
@@ -118,6 +158,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notification} />
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
       <h3>add a new</h3>
       <PersonForm newName={newName} newNumber={newNumber} handleNameChange={handleNameChange} handleNumberChange={handleNumberChange} addContact={addContact} />
