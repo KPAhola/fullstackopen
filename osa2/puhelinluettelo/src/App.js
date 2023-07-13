@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import contactService from './services/persons'
 
-const Notification = ({ message }) => {
+const Notification = ({ message, color }) => {
   const notificationStyle = {
-    color: 'green',
+    color: color,
     backgroundColor: 'lightgrey',
     fontSize: '20px',
     borderStyle: 'solid',
@@ -86,15 +86,26 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
   const [notification, setNotification] = useState(null)
+  const [notificationColor, setNotificationColor] = useState('green')
 
   useEffect(() => {
     contactService.getAll()
       .then(response => setPersons(response))
   }, [])
 
-  const showSuccessMessage = (message) => {
+  const showNotification = (message) => {
     setNotification(message)
     setTimeout(() => setNotification(null), 5000)
+  }
+
+  const showSuccessMessage = (message) => {
+    setNotificationColor('green')
+    showNotification(message)
+  }
+
+  const showErrorMessage = (message) => {
+    setNotificationColor('red')
+    showNotification(message)
   }
 
   const addContact = (event) => {
@@ -106,8 +117,17 @@ const App = () => {
 
     const replaceNumber = () => {
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
-        contactService.update(persons.find(person => person.name === newName).id, newContact).then(response => setPersons(persons.map(person => person.name !== newName ? person : response)))
-        showSuccessMessage(`Changed ${newName}'s number`)
+        contactService.update(persons.find(person => person.name === newName).id, newContact)
+          .then(response => {
+            setPersons(persons.map(person => person.name !== newName ? person : response))
+            showSuccessMessage(`Changed ${newName}'s number`)
+          }
+        )
+          .catch(error => {
+            showErrorMessage(`Information of ${newName} has already been removed from server`)
+            setPersons(persons.filter(person => person.name !== newName))
+          }
+          )
       }
     }
 
@@ -116,7 +136,7 @@ const App = () => {
       : contactService.create(newContact)
           .then(response => {
             setPersons(persons.concat(response))
-            showSuccessMessage(`Successfully added ${newName}`)
+            showSuccessMessage(`Added ${newName}`)
           }
           )
     setNewName('')
@@ -135,7 +155,7 @@ const App = () => {
                 }
                 )
                 .catch(error => {
-                          alert(`${name} was already removed from server`)
+                          showErrorMessage(`Information of ${name} has already been removed from server`)
                           setPersons(persons.filter(person => person.id !== id))
                         }
                 )
@@ -158,7 +178,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={notification} />
+      <Notification message={notification} color={notificationColor} />
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
       <h3>add a new</h3>
       <PersonForm newName={newName} newNumber={newNumber} handleNameChange={handleNameChange} handleNumberChange={handleNumberChange} addContact={addContact} />
