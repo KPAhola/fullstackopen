@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "mongoose": "^7.4.1"
+  },
+  "name": "tietokanta_komentorivilta",
+  "version": "1.0.0",
+  "main": "mongo.js",
+  "devDependencies": {},
+  "scripts": {
+    "start": "node mongo.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kari-Pekka Ahola",
+  "license": "ISC",
+  "description": ""
+}
