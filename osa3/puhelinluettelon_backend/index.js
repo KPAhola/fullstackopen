@@ -12,49 +12,31 @@ app.use(cors())
 
 morgan.token('request-body', (request, response) => request.method === 'POST' ? JSON.stringify(request.body) : '')
 
-let persons = [
-  {
-    "id": 1,
-    "name": "Arto Hellas",
-    "number": "040-123456"
-  },
-  {
-    "id": 2,
-    "name": "Ada Lovelace",
-    "number": "39-44-5323523"
-  },
-  {
-    "id": 3,
-    "name": "Dan Abramov",
-    "number": "12-43-234345"
-  },
-  {
-    "id": 4,
-    "name": "Mary Poppendieck",
-    "number": "39-23-6423122"
-  }
-]
-
 app.get('/info', (request, response) => {
-  const message = (`
-    <div>
-      <p>Phonebook has info for ${persons.length} people</p>
-      <p>${Date()}</p>
-    </div>
-    `)
-  response.send(message)
+  Person.estimatedDocumentCount()
+    .then(count => {
+      const message = (`
+        <div>
+          <p>Phonebook has info for ${count} people</p>
+          <p>${Date()}</p>
+        </div>
+        `)
+      response.send(message)
+    })
 })
 
 app.get('/api/persons', (request, response) => {
   Person.find({}).then(people => response.json(people))
 })
 
-app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  const person = persons.find(person => person.id === id)
-  person
-    ? response.json(person)
-    : response.status(404).end()
+app.get('/api/persons/:id', (request, response, next) => {
+  Person.findById(request.params.id)
+    .then(person =>  {
+      person
+        ? response.json(person)
+        : response.status(404).end()
+    })
+    .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
