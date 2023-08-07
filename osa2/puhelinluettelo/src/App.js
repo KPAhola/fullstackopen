@@ -139,6 +139,7 @@ const App = () => {
             showSuccessMessage(`Added ${newName}`)
           }
           )
+          .catch(error => showErrorMessage(error.response.data.error))
     setNewName('')
     setNewNumber('')
   }
