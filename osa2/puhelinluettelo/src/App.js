@@ -124,8 +124,12 @@ const App = () => {
           }
         )
           .catch(error => {
-            showErrorMessage(`Information of ${newName} has already been removed from server`)
-            setPersons(persons.filter(person => person.name !== newName))
+            if (error.response.status === 400) {
+              showErrorMessage(error.response.data.error)
+            } else {
+              showErrorMessage(`Information of ${newName} has already been removed from server`)
+              setPersons(persons.filter(person => person.name !== newName))
+            }
           }
           )
       }
