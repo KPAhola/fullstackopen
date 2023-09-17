@@ -10,7 +10,7 @@ app.use(express.static('build'))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :request-body'))
 app.use(cors())
 
-morgan.token('request-body', (request, response) => request.method === 'POST' ? JSON.stringify(request.body) : '')
+morgan.token('request-body', (request) => request.method === 'POST' ? JSON.stringify(request.body) : '')
 
 app.get('/info', (request, response) => {
   Person.estimatedDocumentCount()
@@ -41,12 +41,12 @@ app.get('/api/persons/:id', (request, response, next) => {
 
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
-    .then(result => response.status(204).end())
+    .then(() => response.status(204).end())
     .catch(error => next(error))
 })
 
 app.post('/api/persons', (request, response, next) => {
-  const newPerson = new Person({ 
+  const newPerson = new Person({
     name: request.body.name,
     number: request.body.number
   })
@@ -66,12 +66,12 @@ app.post('/api/persons', (request, response, next) => {
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
-  const {name, number} = request.body
+  const { name, number } = request.body
   const person = {
-   name: name,
-   number: number
+    name: name,
+    number: number
   }
-  Person.findByIdAndUpdate(request.params.id, person, {new: true, runValidators: true, context: 'query'})
+  Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' })
     .then(updatedPerson => {
       if (updatedPerson) {
         response.json(updatedPerson)
@@ -83,15 +83,15 @@ app.put('/api/persons/:id', (request, response, next) => {
 })
 
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({error: 'unknown endpoint'})
+  response.status(404).send({ error: 'unknown endpoint' })
 }
 
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
   if (error.name === 'CastError') {
-    return response.status(400).send({error: 'malformatted id'})
+    return response.status(400).send({ error: 'malformatted id' })
   } else if (error.name === 'ValidationError') {
-    return response.status(400).json({error: error.message})
+    return response.status(400).json({ error: error.message })
   }
   next(error)
 }
